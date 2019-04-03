@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public static class ServiceLocator
 {
@@ -44,14 +45,48 @@ public static class ServiceLocator
         }
     }
 
-    public static T GetService<T>(string id = null , bool createIfNotFound = false) where T : MonoBehaviour
+    public static void UnregisterService<T>() where T : MonoBehaviour
     {
-        //if id is null set it as the type of the service
-        if (id == null)
-        {
-            id = typeof(T).Name;
-        }
+        UnregisterService(typeof(T).Name);
+    }
 
+    public static void UnregisterService(MonoBehaviour service) 
+    {
+        if (m_serviceContainer.ContainsValue(service))
+        {
+            List<string> keyList = m_serviceContainer.Keys.ToList();
+
+            foreach (string key in m_serviceContainer.Keys.ToList())
+            {
+                if (m_serviceContainer[key] == service)
+                {
+                    m_serviceContainer.Remove(key);
+                }
+            }
+        }
+    }
+
+    public static void UnregisterService(string id)
+    {
+        if (m_serviceContainer.ContainsKey(id))
+        {
+            m_serviceContainer.Remove(id);
+        }
+    }    
+
+    public static T GetService<T>(bool createIfNotFound) where T : MonoBehaviour
+    {
+        return GetService<T>( typeof(T).Name , createIfNotFound );
+    }
+
+    public static T GetService<T>(string id) where T : MonoBehaviour
+    {
+        return GetService<T>(id, false);
+    }
+    
+    public static T GetService<T>(string id , bool createIfNotFound ) where T : MonoBehaviour
+    {
+        
         Object service = GetServiceByIdAndDeleteIfNull(id);
 
         if (service != null)
@@ -60,6 +95,11 @@ public static class ServiceLocator
         }
 
         service = FindAndRegisterService<T>(id);
+
+        if (service != null)
+        {
+            return (T) service;
+        }
 
         if(service == null && createIfNotFound)
         {
@@ -72,6 +112,9 @@ public static class ServiceLocator
     
     private static Object GetServiceByIdAndDeleteIfNull(string id)
     {
+        if(!m_serviceContainer.ContainsKey(id))
+            return null;
+
         Object service = m_serviceContainer[id];
 
         if (m_serviceContainer.ContainsKey(id) && service == null)
