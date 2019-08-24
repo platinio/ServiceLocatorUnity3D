@@ -86,7 +86,7 @@ namespace Platinio
             return GetService<T>( id, false );
         }
 
-        public static T GetService<T>(string id, bool createIfNotFound) where T : MonoBehaviour
+        public static T GetService<T>(string id, bool createIfNotFound = false) where T : MonoBehaviour
         {
 
             Object service = GetServiceByIdAndDeleteIfNull( id );
