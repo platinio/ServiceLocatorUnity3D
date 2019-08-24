@@ -74,7 +74,7 @@ public static class ServiceLocator
         }
     }    
 
-    public static T GetService<T>(bool createIfNotFound) where T : MonoBehaviour
+    public static T GetService<T>(bool createIfNotFound = false) where T : MonoBehaviour 
     {
         return GetService<T>( typeof(T).Name , createIfNotFound );
     }
